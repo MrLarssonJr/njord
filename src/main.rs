@@ -1,10 +1,15 @@
 use std::net::{IpAddr, SocketAddr};
 use axum::{Router};
+use axum::extract::Path;
 use axum::routing::get;
 
 #[tokio::main]
 async fn main() {
-	let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+	let app = Router::new()
+		.route("/", get(|| async { "Hello, World!" }))
+		.route("/:name", get(|Path(user_id): Path<String>| async move { format!("Hello, {user_id}") }));
+
+
 	let socket_addr = get_socket_addr();
 	axum::Server::bind(&socket_addr)
 		.serve(app.into_make_service())
