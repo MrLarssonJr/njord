@@ -1,13 +1,30 @@
+mod data;
+mod env;
+
 use std::net::{IpAddr, SocketAddr};
 use axum::{Router};
 use axum::extract::Path;
+use axum::http::StatusCode;
 use axum::routing::get;
 
 #[tokio::main]
 async fn main() {
+	let db = data::Database::new().await;
+
 	let app = Router::new()
 		.route("/", get(|| async { "Hello, World!" }))
-		.route("/:name", get(|Path(user_id): Path<String>| async move { format!("Hello, {user_id}") }));
+		.route("/:name", get(|Path(user_id): Path<String>| async move {
+			let count = db.inc_and_get_count(&user_id)
+				.await;
+
+			let Ok(count) = count else {
+				return (StatusCode::INTERNAL_SERVER_ERROR, "An error occurred".to_string());
+			};
+
+			let greeting = format!("Hello, {user_id}!\nI've greeted you {count} time(s).");
+
+			(StatusCode::OK, greeting)
+		}));
 
 
 	let socket_addr = get_socket_addr();
@@ -24,20 +41,7 @@ fn get_socket_addr() -> SocketAddr {
 }
 
 fn get_port() -> u16 {
-	env::get("PORT")
+	env::must_get("PORT")
 		.parse()
 		.expect("value in PORT environment expected to be a unsigned 16-bit integer")
-}
-
-mod env {
-	use std::ffi::OsStr;
-	use std::fmt::Display;
-
-	pub fn get<K: AsRef<OsStr> + Display + Copy>(key: K) -> String {
-		match std::env::var(key) {
-			Ok(val) => val,
-			Err(std::env::VarError::NotPresent) => panic!("expected {key} to be present in environment"),
-			Err(std::env::VarError::NotUnicode(_)) => panic!("expected value for key {key} in environment to be valid UTF-8"),
-		}
-	}
 }
