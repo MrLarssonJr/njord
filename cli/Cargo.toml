@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dialoguer = { version = "0.10.3", features = ["fuzzy-select"] }
-indicatif = "0.17.3"
+inquire = { version = "0.6.1", features = ["date"] }
 confy = { version = "0.5.1", features = ["ron_conf"], default-features = false }
 serde = { version = "1.0.159", features = ["derive"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 reqwest = { version = "0.11.16", features = ["blocking", "json"] }
 replace_with = "0.1.7"
+once_cell = "1.17.1"
