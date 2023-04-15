@@ -1,19 +1,15 @@
 mod nordigen;
-mod config;
-mod client_credentials;
-mod token;
-mod institution;
 mod interactions;
-mod requisition;
 
 use color_eyre::eyre;
 use color_eyre::eyre::eyre;
 use once_cell::sync::Lazy;
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
-use crate::config::Config;
-use crate::institution::Institution;
-use crate::token::Token;
+use crate::nordigen::config::Config;
+use crate::nordigen::institution::Institution;
+use crate::nordigen::token::Token;
+use crate::nordigen::transaction::Transaction;
 
 pub static APP_NAME: &'static str = "njord";
 pub static HTTP_CLIENT: Lazy<Client> = Lazy::new(|| {
@@ -65,11 +61,33 @@ fn main() -> eyre::Result<()> {
 		}
 	}
 
-	let account_ids = requisitions.iter()
-		.flat_map(|req| req.accounts.iter().map(String::as_str))
-		.collect::<Vec<_>>();
+	let mut transactions: Vec<Transaction> = vec![];
 
-	println!("{account_ids:#?}");
+	for (institution_index, requisition) in requisitions.iter().enumerate() {
+		let institution = &mut selected_institutions[institution_index];
+		for account_id in requisition.accounts.iter() {
+			let account_transactions = match Transaction::list_in_account(&client_credentials, &mut token, account_id) {
+				Ok(transactions) => transactions,
+				Err(err) => {
+					eprintln!("{err}");
+					continue
+				},
+			};
+
+			for transaction in account_transactions.into_iter() {
+				let observed_transactions = institution.observed_transactions
+					.entry(account_id.to_string())
+					.or_default();
+
+				let is_unseen = observed_transactions.insert(transaction.id.clone());
+				if is_unseen {
+					transactions.push(transaction);
+				}
+			}
+		}
+	}
+
+	println!("{:#?}", transactions);
 
 	let save_config = Config {
 		client_credentials: Some(client_credentials),

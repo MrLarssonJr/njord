@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use crate::client_credentials::ClientCredentials;
-use crate::institution::Institution;
-use crate::token::Token;
+use crate::nordigen::client_credentials::ClientCredentials;
+use crate::nordigen::institution::Institution;
+use crate::nordigen::token::Token;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Config {

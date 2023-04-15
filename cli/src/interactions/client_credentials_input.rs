@@ -1,6 +1,6 @@
 use color_eyre::eyre;
 use inquire::Text;
-use crate::client_credentials::ClientCredentials;
+use crate::nordigen::client_credentials::ClientCredentials;
 
 pub struct ClientCredentialsInput;
 

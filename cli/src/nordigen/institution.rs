@@ -1,11 +1,15 @@
+use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use color_eyre::eyre;
-use crate::client_credentials::ClientCredentials;
+use crate::nordigen::client_credentials::ClientCredentials;
 use crate::HTTP_CLIENT;
 use crate::nordigen::http_interface;
-use crate::requisition::Requisition;
-use crate::token::Token;
+use crate::nordigen::requisition::Requisition;
+use crate::nordigen::token::Token;
+
+type AccountID = String;
+type TransactionID = String;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Institution {
@@ -13,6 +17,7 @@ pub struct Institution {
 	pub name: String,
 	pub countries: Vec<String>,
 	pub requisition_id: Option<String>,
+	pub observed_transactions: HashMap<AccountID, HashSet<TransactionID>>,
 }
 
 impl Institution {
@@ -26,6 +31,7 @@ impl Institution {
 				name: res.name,
 				countries: res.countries,
 				requisition_id: None,
+				observed_transactions: HashMap::new(),
 			})
 			.collect();
 

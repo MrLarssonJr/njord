@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Duration, Local};
 use color_eyre::eyre;
-use crate::client_credentials::ClientCredentials;
+use crate::nordigen::client_credentials::ClientCredentials;
 use crate::HTTP_CLIENT;
 use crate::nordigen::http_interface;
 

@@ -1,6 +1,6 @@
 use color_eyre::eyre;
 use inquire::{Confirm};
-use crate::institution::Institution;
+use crate::nordigen::institution::Institution;
 
 pub struct ReuseConfirm<'a> {
 	selected: &'a [Institution],

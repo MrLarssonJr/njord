@@ -1,6 +1,6 @@
 use color_eyre::eyre;
 use inquire::{MultiSelect};
-use crate::institution::Institution;
+use crate::nordigen::institution::Institution;
 
 pub struct InstitutionSelect {
 	available_institutions: Vec<Institution>,
