@@ -53,10 +53,8 @@ fn post<Req: Serialize, Res: for<'de> Deserialize<'de>>(client: &Client, endpoin
 		let status = res.status();
 
 		if !status.is_success() {
-			eprintln!("{status}");
 			let body = res.text()?;
-			eprintln!("{body}");
-			return Err(eyre!("[nordigen post] non OK response"));
+			return Err(eyre!("[POST:{status}: {body}]"));
 		}
 
 		res.json()?
@@ -82,19 +80,47 @@ fn get<Res: for<'de> Deserialize<'de>>(client: &Client, endpoint: &str, token: O
 		let status = res.status();
 
 		if !status.is_success() {
-			eprintln!("{status}");
 			let body = res.text()?;
-			eprintln!("{body}");
-			return Err(eyre!("[nordigen get] non OK response"));
+			return Err(eyre!("[{status}] GET {endpoint}: {body}"));
 		}
 
-		res.json()?
+		let json: serde_json::Value = res.json()?;
+		// eprintln!("[{endpoint}] {json:#?}");
+
+		serde_json::from_value(json)?
 	};
 
 	Ok(res)
 }
 
 pub mod accounts {
+	pub mod details {
+		use color_eyre::eyre;
+		use reqwest::blocking::Client;
+		use serde::Deserialize;
+		use crate::nordigen::http_interface;
+
+		#[derive(Debug, Deserialize)]
+		pub struct GetResponseBody {
+			pub account: Account,
+		}
+
+		#[derive(Debug, Deserialize)]
+		pub struct Account {
+			pub iban: String,
+			pub bban: Option<String>,
+			pub status: String,
+			pub name: Option<String>,
+			#[serde(rename="displayName")]
+			pub display_name: Option<String>
+		}
+
+		pub fn get(client: &Client, token: &str, account_id: &str) -> eyre::Result<GetResponseBody> {
+			let endpoint = format!("accounts/{account_id}/details");
+			http_interface::get(client, &endpoint, Some(token), None)
+		}
+	}
+
 	pub mod transactions {
 		use chrono::NaiveDate;
 		use color_eyre::eyre;

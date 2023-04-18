@@ -3,6 +3,7 @@ use color_eyre::eyre;
 use serde::{Deserialize, Serialize};
 use crate::nordigen::client_credentials::ClientCredentials;
 use crate::HTTP_CLIENT;
+use crate::nordigen::account::Account;
 use crate::nordigen::http_interface;
 use crate::nordigen::token::Token;
 
@@ -11,7 +12,7 @@ pub struct Requisition {
 	pub id: String,
 	pub created: DateTime<Local>,
 	pub status: String,
-	pub accounts: Vec<String>,
+	pub accounts: Vec<Account>,
 	pub link: String,
 }
 
@@ -26,11 +27,21 @@ impl Requisition {
 
 		let res = http_interface::requisitions::post(&HTTP_CLIENT, access_token, &body)?;
 
+		let accounts = res.accounts.iter()
+			.map(|account_id| { Account::get(client_credentials, token, account_id) })
+			.flat_map(|res| match res {
+				Ok(account) if account.is_available() => Some(Ok(account)),
+				Ok(_) => None,
+				Err(e) => Some(Err(e))
+			})
+			.collect::<Result<Vec<_>, _>>()?;
+
+
 		Ok(Requisition {
 			id: res.id,
 			created: res.created,
 			status: res.status,
-			accounts: res.accounts,
+			accounts,
 			link: res.link,
 		})
 	}
@@ -40,11 +51,20 @@ impl Requisition {
 
 		let res = http_interface::requisitions::get(&HTTP_CLIENT, access_token, id)?;
 
+		let accounts = res.accounts.iter()
+			.map(|account_id| { Account::get(client_credentials, token, account_id) })
+			.flat_map(|res| match res {
+				Ok(account) if account.is_available() => Some(Ok(account)),
+				Ok(_) => None,
+				Err(e) => Some(Err(e))
+			})
+			.collect::<Result<Vec<_>, _>>()?;
+
 		Ok(Requisition {
 			id: res.id,
 			created: res.created,
 			status: res.status,
-			accounts: res.accounts,
+			accounts,
 			link: res.link,
 		})
 	}
