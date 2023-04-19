@@ -14,7 +14,7 @@ impl<'a> AcceptedConfirm<'a> {
 	}
 
 	pub fn prompt(self) -> eyre::Result<()> {
-		println!("Opening page to authorize access to {} in your browser!", self.institution);
+		eprintln!("Opening page to authorize access to {} in your browser!", self.institution);
 
 		Confirm::new("Done authorising?")
 			.with_default(true)

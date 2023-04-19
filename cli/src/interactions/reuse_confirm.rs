@@ -18,10 +18,10 @@ impl<'a> ReuseConfirm<'a> {
 			return Ok(false);
 		}
 
-		println!("These institutions were selected last time:");
+		eprintln!("These institutions were selected last time:");
 
 		for institution in self.selected {
-			println!("{institution}");
+			eprintln!("{institution}");
 		}
 
 		Ok(Confirm::new("Reuse them?").prompt()?)

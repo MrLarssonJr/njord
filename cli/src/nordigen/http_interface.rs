@@ -107,7 +107,7 @@ pub mod accounts {
 
 		#[derive(Debug, Deserialize)]
 		pub struct Account {
-			pub iban: String,
+			pub iban: Option<String>,
 			pub bban: Option<String>,
 			pub status: String,
 			pub name: Option<String>,
@@ -148,7 +148,7 @@ pub mod accounts {
 			#[serde(rename = "transactionId")]
 			pub transaction_id: String,
 			#[serde(rename = "additionalInformation")]
-			pub additional_information: String,
+			pub additional_information: Option<String>,
 		}
 
 		#[derive(Debug, Deserialize)]

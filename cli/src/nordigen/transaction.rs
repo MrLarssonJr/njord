@@ -12,7 +12,7 @@ pub struct RawTransaction {
 	pub date: NaiveDate,
 	pub currency: String,
 	pub amount: Decimal,
-	pub additional_info: String,
+	pub additional_info: Option<String>,
 	pub id: String,
 }
 

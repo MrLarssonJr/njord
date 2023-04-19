@@ -10,7 +10,7 @@ use crate::nordigen::token::Token;
 pub struct Account {
 	pub id: String,
 	pub bban: Option<String>,
-	pub iban: String,
+	pub iban: Option<String>,
 	pub status: String,
 	pub name: Option<String>,
 	pub display_name: Option<String>

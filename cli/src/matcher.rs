@@ -25,11 +25,11 @@ impl Display for Transaction {
 
 #[derive(Debug)]
 pub struct NormalTransaction {
-	account: Rc<Account>,
-	amount: Decimal,
-	currency: String,
-	date: NaiveDate,
-	additional_info: String,
+	pub account: Rc<Account>,
+	pub amount: Decimal,
+	pub currency: String,
+	pub date: NaiveDate,
+	pub additional_info: Option<String>,
 }
 
 impl Display for NormalTransaction {
@@ -42,19 +42,23 @@ impl Display for NormalTransaction {
 			write!(f, "to: {} ", self.account)?;
 			write!(f, "{} {} ", self.amount, self.currency)?;
 		}
-		write!(f, "{}", self.additional_info)
+		if let Some(additional_info) = &self.additional_info {
+			write!(f, "{additional_info}")?;
+		}
+
+		Ok(())
 	}
 }
 
 #[derive(Debug)]
 pub struct TransferTransaction {
-	from: Rc<Account>,
-	to: Rc<Account>,
-	amount: Decimal,
-	currency: String,
-	date: NaiveDate,
-	from_additional_info: String,
-	to_additional_info: String,
+	pub from: Rc<Account>,
+	pub to: Rc<Account>,
+	pub amount: Decimal,
+	pub currency: String,
+	pub date: NaiveDate,
+	pub from_additional_info: Option<String>,
+	pub to_additional_info: Option<String>,
 }
 
 impl Display for TransferTransaction {
@@ -69,8 +73,13 @@ impl Display for TransferTransaction {
 			write!(f, "to: {} ", self.from)?;
 			write!(f, "{} {} ", self.amount, self.currency)?;
 		}
-		write!(f, "{} ", self.from_additional_info)?;
-		write!(f, "{}", self.to_additional_info)
+		if let Some(from_additional_info) = &self.from_additional_info {
+			write!(f, "{} ", from_additional_info)?;
+		}
+		if let Some(to_additional_info) = &self.to_additional_info {
+			write!(f, "{} ", to_additional_info)?;
+		}
+		Ok(())
 	}
 }
 
@@ -131,8 +140,8 @@ pub fn match_transactions(raw_transactions: &[(RawTransaction, Rc<Account>)]) ->
 }
 
 fn ask_human<'a>(target: &NormalTransaction, scored_candidates: &[(&'a NormalTransaction, usize, Duration)]) -> eyre::Result<Option<(&'a NormalTransaction, usize)>> {
-	println!("Trying to find figure out if the following transaction is part of a transfer");
-	println!("{target}");
+	eprintln!("Trying to find figure out if the following transaction is part of a transfer");
+	eprintln!("{target}");
 
 	let options = scored_candidates.into_iter()
 		.map(|(transaction, index, error)| Candidate {
